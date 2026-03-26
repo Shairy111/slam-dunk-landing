@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-brand-orange: #FF4400;
+  --color-brand-green: #00FF33;
+  --color-brand-dark: #0A0A0A;
+  --color-brand-gray: #7A7A7A;
+  --color-brand-light: #EFEFEF;
+
+  --font-anton: var(--font-anton), "sans-serif";
+  --font-inter: var(--font-inter), "sans-serif";
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    /* Background color will now be handled dynamically by React/GSAP on a wrapper div */
+    background-color: var(--color-brand-dark);
+    color: var(--color-brand-light);
+    font-family: var(--font-inter);
+    /* overflow: hidden; Removed to allow GSAP ScrollTrigger to work natively */
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom utilities for the premium feel */
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
 }
