@@ -48,6 +48,16 @@ Your goal is to build immersive 3D web experiences progressively based on visual
 - Implement squash-and-stretch by scaling the mesh dynamically upon impact.
 - Ensure HTML UI overlays use `pointer-events-none` so clicks can pass through to the 3D canvas, but re-enable `pointer-events-auto` on specific buttons.
 
+### 6. 3D Asset Sourcing & Workflow
+**Rule:** Understand the difference between primitive objects and complex models to determine the correct asset pipeline.
+**Implementation:**
+- **Primitive Objects (e.g., Basketballs, Cubes, Simple shapes):** Build the geometry programmatically using Three.js built-in primitives (e.g., `<sphereGeometry />`). Use external `.png` or `.jpg` files solely for PBR Textures (Normal maps, Roughness maps) or procedurally generate textures using the Canvas API.
+- **Complex Real-World Objects (e.g., Skateboards, Cars, Shoes):** Do *not* attempt to build the geometry programmatically. 
+  1. Source or generate a highly optimized **`.glb`** or **`.gltf`** file. This format acts as the "JPEG of 3D", compressing both the complex mesh and textures into a single web-friendly file. (Ignore `.blend`, `.obj`, or `.fbx` files).
+  2. Place the `.glb` file in the `public` directory.
+  3. Run `npx gltfjsx public/your-model.glb` in the terminal. This tool will automatically parse the 3D file and generate a declarative, fully-typed React component containing all the necessary `<mesh>` and `<material>` tags.
+  4. Import the generated component into your `<Scene />` and animate it using GSAP `useRef` targeting, just as you would a primitive object.
+
 ---
 
 ## The "Don'ts" (Failure Anti-Patterns)
