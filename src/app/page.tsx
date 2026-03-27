@@ -63,7 +63,19 @@ const slides: SlideData[] = [
     buttonColor: "#00BFFF", // Bright cyan
     ballBaseColor: "#001188", // Deep blue
     ballLineColor: "#00BFFF", // Cyan
-    patternType: "grid",
+    patternType: "grid", // Third slide has the unique grid pattern
+  },
+  {
+    id: 4,
+    titleLeft: "INF",
+    titleRight: "ORNO", // As seen in screenshot "INF ORNO"
+    price: "$64.99",
+    size: "29.5\"",
+    themeColor: "#330000", // Dark blood red border from screenshot
+    buttonColor: "#CC0000", // Bright red button from screenshot
+    ballBaseColor: "#0A0A0A", // Very dark grey/black ball
+    ballLineColor: "#FF0000", // Bright red lines
+    patternType: "classic", // Uses the classic basketball lines
   }
 ];
 
