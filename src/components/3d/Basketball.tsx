@@ -305,65 +305,76 @@ export const Basketball = ({ slide }: BasketballProps) => {
       });
 
       // Trajectory: 
-      // 1. Wind up (move left and down, scale down)
-      // 2. Shoot (move to top right)
-      // 3. Dunk (plunge down slightly, scale to 0)
-      // 4. Reset (pop back to original)
+      // 1. Wind up (pull back slightly to the left, stay centered)
+      // 2. Shoot (arc up towards the top right corner)
+      // 3. Dunk (drop straight down through the net)
+      // 4. Reset
 
+      // 1. The Windup (Pull back)
       tl.to(dunkGroupRef.current.position, {
-        x: -4, 
-        y: -2, 
-        z: 1,
-        duration: 0.5, 
-        ease: "power2.out"
+        x: -2, 
+        y: -1, 
+        z: 2, // Move closer to camera
+        duration: 0.6, 
+        ease: "back.out(1.2)"
       }, 0)
       .to(dunkGroupRef.current.scale, {
-        x: 0.8, y: 0.8, z: 0.8,
-        duration: 0.5,
+        x: 1.1, y: 1.1, z: 1.1, // Swell slightly
+        duration: 0.6,
         ease: "power2.out"
       }, 0)
       
-      // Shoot towards the hoop (top right)
+      // 2. The Arc Shot (Shoot towards the top right corner, perfectly hitting the cart icon)
+      // We use a custom ease or separate x/y eases to create a parabolic arc
       .to(dunkGroupRef.current.position, {
-        x: 5, 
-        y: 4.5, 
-        z: -3,
-        duration: 0.7, 
-        ease: "power1.in"
-      }, 0.5)
-      .to(dunkGroupRef.current.scale, {
-        x: 0.25, y: 0.25, z: 0.25,
-        duration: 0.7, 
-        ease: "power1.in"
-      }, 0.5)
+        x: 8.5, // Push much further right to hit the corner perfectly on most screens
+        z: -5, // Push far into the background
+        duration: 0.8, 
+        ease: "power1.inOut" // Linear horizontal movement
+      }, 0.6)
+      .to(dunkGroupRef.current.position, {
+        y: 6.5, // Shoot very high up to create the arc peak
+        duration: 0.4, 
+        ease: "power2.out" // Decelerate on the way up to the peak
+      }, 0.6)
+      .to(dunkGroupRef.current.position, {
+        y: 4.8, // Fall down to the exact height of the hoop
+        duration: 0.4, 
+        ease: "power2.in" // Accelerate on the way down from the peak
+      }, 1.0)
       
-      // Plunge through the net
-      .to(dunkGroupRef.current.position, {
-        y: 3,
-        duration: 0.2,
-        ease: "power2.in"
-      }, 1.2)
       .to(dunkGroupRef.current.scale, {
-        x: 0, y: 0, z: 0,
-        duration: 0.2,
+        x: 0.15, y: 0.15, z: 0.15, // Shrink drastically to simulate distance
+        duration: 0.8, 
         ease: "power2.in"
-      }, 1.2)
+      }, 0.6)
+      
+      // 3. The Dunk (Plunge straight down through the net)
+      .to(dunkGroupRef.current.position, {
+        y: 3.5, // Plunge down
+        duration: 0.25,
+        ease: "power3.in"
+      }, 1.4)
+      .to(dunkGroupRef.current.scale, {
+        x: 0, y: 0, z: 0, // Vanish into the cart
+        duration: 0.2,
+        ease: "power3.in"
+      }, 1.45)
 
-      // Reset invisibly and pop back
+      // 4. The Reset (Pop back to center)
       .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
       .to(dunkGroupRef.current.scale, {
         x: 1, y: 1, z: 1,
-        duration: 0.6,
-        ease: "elastic.out(1, 0.5)"
-      }, "+=0.3");
+        duration: 0.8,
+        ease: "elastic.out(1.2, 0.4)"
+      }, "+=0.2");
 
-      // Add a dramatic spin to the ball while it flies
+      // Add a rapid backspin during the shot to simulate a real jump shot
       tl.to(dunkGroupRef.current.rotation, {
-        x: Math.PI * 4,
-        y: Math.PI * 2,
-        z: -Math.PI * 2,
-        duration: 1.4,
-        ease: "power1.inOut"
+        x: dunkGroupRef.current.rotation.x - Math.PI * 6, // Heavy backspin
+        y: dunkGroupRef.current.rotation.y + Math.PI * 2,
+        duration: 1.6,
+        ease: "power2.inOut"
       }, 0);
     };
 
