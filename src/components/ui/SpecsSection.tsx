@@ -20,41 +20,49 @@ export const SpecsSection = ({ slide }: SpecsSectionProps) => {
             {`
               @keyframes spin-cw { 100% { transform: rotate(360deg); } }
               @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
-              @keyframes pulse-opacity { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+              @keyframes pulse-opacity { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
             `}
           </style>
+
+          {/* Define a drop shadow filter to make theme lines pop against the background */}
+          <defs>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="5" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
 
           {/* Outer pulsing thin ring */}
           <circle cx="500" cy="500" r="460" fill="none" stroke="#222" strokeWidth="1" />
           <g style={{ transformOrigin: 'center', animation: 'spin-cw 40s linear infinite' }}>
-            <circle cx="500" cy="500" r="460" fill="none" stroke={slide.themeColor} strokeWidth="1.5" strokeDasharray="10 40 30 100" style={{ animation: 'pulse-opacity 4s ease-in-out infinite' }} />
+            <circle cx="500" cy="500" r="460" fill="none" stroke={slide.buttonColor} strokeWidth="2.5" strokeDasharray="10 40 30 100" style={{ animation: 'pulse-opacity 4s ease-in-out infinite' }} filter="url(#glow)" />
           </g>
 
           {/* Middle complex tracking ring */}
           <circle cx="500" cy="500" r="380" fill="none" stroke="#1a1a1a" strokeWidth="8" />
           <g style={{ transformOrigin: 'center', animation: 'spin-ccw 25s linear infinite' }}>
             <circle cx="500" cy="500" r="380" fill="none" stroke="#333" strokeWidth="2" strokeDasharray="4 16" />
-            {/* Theme colored arcs */}
-            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="4" strokeDasharray="150 2000" strokeLinecap="round" />
-            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="4" strokeDasharray="80 2000" strokeDashoffset="-800" strokeLinecap="round" />
+            {/* Theme colored arcs - Using buttonColor for much higher visibility/contrast */}
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.buttonColor} strokeWidth="5" strokeDasharray="150 2000" strokeLinecap="round" filter="url(#glow)" />
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.buttonColor} strokeWidth="5" strokeDasharray="80 2000" strokeDashoffset="-800" strokeLinecap="round" filter="url(#glow)" />
             
             {/* Glow/Pulse effect on an arc */}
-            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="8" strokeDasharray="20 2000" strokeDashoffset="-300" strokeLinecap="round" style={{ animation: 'pulse-opacity 2s infinite', filter: 'blur(4px)' }} />
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.buttonColor} strokeWidth="8" strokeDasharray="20 2000" strokeDashoffset="-300" strokeLinecap="round" style={{ animation: 'pulse-opacity 2s infinite' }} filter="url(#glow)" />
           </g>
 
           {/* Inner tight framing ring */}
           <g style={{ transformOrigin: 'center', animation: 'spin-cw 15s linear infinite' }}>
             <circle cx="500" cy="500" r="300" fill="none" stroke="#444" strokeWidth="1" strokeDasharray="100 20" />
-            <circle cx="500" cy="500" r="300" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeDasharray="40 2000" strokeLinecap="round" />
+            <circle cx="500" cy="500" r="300" fill="none" stroke={slide.buttonColor} strokeWidth="3" strokeDasharray="40 2000" strokeLinecap="round" filter="url(#glow)" />
             <circle cx="500" cy="500" r="290" fill="none" stroke="#555" strokeWidth="1" strokeDasharray="2 8" />
           </g>
 
           {/* Animated Target brackets */}
-          <g style={{ animation: 'pulse-opacity 3s infinite' }}>
-            <path d="M 480 120 L 500 100 L 520 120" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 480 880 L 500 900 L 520 880" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 120 480 L 100 500 L 120 520" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M 880 480 L 900 500 L 880 520" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <g style={{ animation: 'pulse-opacity 3s infinite' }} filter="url(#glow)">
+            <path d="M 480 120 L 500 100 L 520 120" fill="none" stroke={slide.buttonColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 480 880 L 500 900 L 520 880" fill="none" stroke={slide.buttonColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 120 480 L 100 500 L 120 520" fill="none" stroke={slide.buttonColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 880 480 L 900 500 L 880 520" fill="none" stroke={slide.buttonColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </g>
 
           {/* Top Center Grey Marker Dot (glued to the inner ring radius=300 -> y=200) */}
