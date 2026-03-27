@@ -321,6 +321,18 @@ export const Basketball = ({ slide }: BasketballProps) => {
       const targetRightX = 7.5; 
       const targetTopY = 3.8; 
 
+      // CRITICAL FIX FOR DRIFTING: 
+      // Before starting the timeline, completely neutralize the continuous Y-rotation 
+      // from the `useFrame` loop, so the ball is guaranteed to start its math from 
+      // the exact same coordinate system orientation every single time.
+      const startRotationY = groupRef.current.rotation.y;
+      
+      tl.to(groupRef.current.rotation, {
+        y: 0,
+        duration: 0.6,
+        ease: "power2.inOut"
+      }, 0);
+
       // 1. Roll to the bottom-left windup position
       // Using a single bezier path or extremely tight eases for a fluid motion
       tl.to(dunkGroupRef.current.position, {
@@ -385,16 +397,29 @@ export const Basketball = ({ slide }: BasketballProps) => {
         x: 1, y: 1, z: 1,
         duration: 0.8,
         ease: "elastic.out(1.2, 0.4)"
+      }, "+=0.1")
+      // Resume the idle rotation gracefully
+      .to(groupRef.current.rotation, {
+        y: startRotationY + Math.PI * 0.5, // Keep it moving so it doesn't just abruptly stop
+        duration: 0.8,
+        ease: "power2.out"
       }, "+=0.1");
 
       // Handle Rotation Separately on the INNER mesh to prevent group drift
       if (meshRef.current) {
+        // Reset mesh rotation instantly before spinning
+        gsap.set(meshRef.current.rotation, { x: 0, y: 0, z: 0 });
+        
         gsap.to(meshRef.current.rotation, {
-          x: meshRef.current.rotation.x - Math.PI * 6,
-          y: meshRef.current.rotation.y + Math.PI * 2,
-          z: meshRef.current.rotation.z + Math.PI,
+          x: -Math.PI * 6, // Hard absolute values, not relative `-=` math
+          y: Math.PI * 2,
+          z: Math.PI,
           duration: 1.8,
-          ease: "power1.inOut"
+          ease: "power1.inOut",
+          onComplete: () => {
+             // Reset it to exactly 0 when done so the next dunk is mathematically identical
+             gsap.set(meshRef.current!.rotation, { x: 0, y: 0, z: 0 });
+          }
         });
       }
     };
@@ -594,7 +619,9 @@ export const Basketball = ({ slide }: BasketballProps) => {
 
   // Subtle constant rotation
   useFrame((state, delta) => {
-    if (groupRef.current) {
+    // DO NOT rotate the master group while it is bouncing or dunking!
+    // This was causing the mathematical drift because the axes were shifting mid-tween.
+    if (groupRef.current && !isBouncing.current) {
       groupRef.current.rotation.y += delta * 0.05;
       groupRef.current.rotation.x += delta * 0.02;
     }
