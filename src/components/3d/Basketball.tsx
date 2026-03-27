@@ -315,8 +315,9 @@ export const Basketball = ({ slide }: BasketballProps) => {
       const targetLeftX = -7.5;
       const targetBottomY = -3.5;
       
-      const targetRightX = 8.0;
-      const targetTopY = 4.2;
+      // Pushed further right and slightly higher to perfectly align with the top-right header icon
+      const targetRightX = 11.5; 
+      const targetTopY = 5.8;
 
       // 1. Roll diagonally to the bottom-left corner
       tl.to(dunkGroupRef.current.position, {
@@ -345,14 +346,14 @@ export const Basketball = ({ slide }: BasketballProps) => {
       // X & Z move linearly, Y uses an arc (up fast, slow at peak, down fast)
       .to(dunkGroupRef.current.position, {
         x: targetRightX,
-        z: -3, // Move slightly into the background to match UI depth
+        z: -6, // Push much deeper into the background to match perspective scale
         duration: 1.2,
         ease: "none" // Constant horizontal velocity for realistic projectile
       }, 0.8)
       
       // The Y Parabola
       .to(dunkGroupRef.current.position, {
-        y: targetTopY + 3.0, // High peak
+        y: targetTopY + 4.5, // High peak
         duration: 0.6,
         ease: "power2.out" // Decelerate against gravity
       }, 0.8)
@@ -364,27 +365,27 @@ export const Basketball = ({ slide }: BasketballProps) => {
       
       // Scale down to fit in the hoop perfectly
       .to(dunkGroupRef.current.scale, {
-        x: 0.25, y: 0.25, z: 0.25, // Slightly larger than before so it doesn't vanish too early
+        x: 0.12, y: 0.12, z: 0.12, // Scale down more since we are pushing it deeper into the background
         duration: 1.2,
         ease: "power2.in"
       }, 0.8)
 
       // Heavy backspin during flight
       .to(dunkGroupRef.current.rotation, {
-        x: dunkGroupRef.current.rotation.x - Math.PI * 8, // Spin backwards rapidly
+        x: dunkGroupRef.current.rotation.x - Math.PI * 12, // Spin backwards very rapidly
         duration: 1.2,
         ease: "none" // Constant spin in the air
       }, 0.8)
 
       // 3. The Dunk (Plunge through the net)
       .to(dunkGroupRef.current.position, {
-        y: targetTopY - 1.5, // Drop through
-        duration: 0.2,
+        y: targetTopY - 2.0, // Drop cleanly through the net
+        duration: 0.25, // Slightly slower drop to appreciate the swish
         ease: "power3.in"
       }, 2.0)
       .to(dunkGroupRef.current.scale, {
         x: 0, y: 0, z: 0, // Disappear into cart
-        duration: 0.15,
+        duration: 0.2,
         ease: "power3.in"
       }, 2.05)
 
