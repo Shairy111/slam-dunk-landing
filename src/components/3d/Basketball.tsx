@@ -311,6 +311,11 @@ export const Basketball = ({ slide }: BasketballProps) => {
           end: "+=200%", // EXACTLY 2 viewport heights of scroll distance
           scrub: 1, // Smooth scrubbing
           invalidateOnRefresh: true,
+          snap: {
+            snapTo: [0, 0.5, 1], // Snap exactly to the 3 sections
+            duration: { min: 0.2, max: 0.8 },
+            ease: "power2.inOut"
+          },
           onUpdate: (self) => {
             scrollProgress.current = self.progress;
           }

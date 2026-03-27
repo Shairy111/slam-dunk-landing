@@ -83,6 +83,8 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
+  const themeBgRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     // Animate the background color change of the main wrapper
     if (mainWrapperRef.current) {
@@ -93,6 +95,22 @@ export default function Home() {
       });
     }
   }, [currentSlide]);
+
+  // Fade in the theme background when reaching the 3rd section
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.to(themeBgRef.current, {
+        opacity: 1,
+        scrollTrigger: {
+          trigger: "#section-3",
+          start: "top bottom",
+          end: "top top",
+          scrub: true,
+        }
+      });
+    });
+    return () => ctx.revert();
+  }, []);
 
   return (
     <div 
@@ -109,6 +127,13 @@ export default function Home() {
         ref={containerRef}
         className="relative flex-1 w-full bg-[#0A0A0A] shadow-2xl rounded-3xl md:rounded-[2.5rem] overflow-hidden"
       >
+        {/* Animated Background for Section 3 */}
+        <div 
+          ref={themeBgRef}
+          className="absolute inset-0 z-0 pointer-events-none transition-colors duration-1000 opacity-0"
+          style={{ backgroundColor: slides[currentSlide].themeColor }}
+        />
+
         {/* Fixed Header */}
         <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-8 py-6 md:px-12 md:py-8">
           <Header />
@@ -124,7 +149,7 @@ export default function Home() {
         {/* Scrollable Content Layers - Native vertical scrolling block */}
         <div className="relative w-full z-10 pointer-events-none flex flex-col">
           {/* Section 1: Hero Carousel (100vh) */}
-          <div className="w-full h-screen relative shrink-0">
+          <div id="section-1" className="w-full h-screen relative shrink-0">
             <HeroOverlay 
               slide={slides[currentSlide]} 
               totalSlides={slides.length}
@@ -135,12 +160,12 @@ export default function Home() {
           </div>
 
           {/* Section 2: Performance Metrics (100vh) */}
-          <div className="w-full h-screen relative shrink-0">
+          <div id="section-2" className="w-full h-screen relative shrink-0">
             <PerformanceSection slide={slides[currentSlide]} />
           </div>
 
           {/* Section 3: Technical Specs (100vh) */}
-          <div className="w-full h-screen relative shrink-0">
+          <div id="section-3" className="w-full h-screen relative shrink-0">
             <SpecsSection slide={slides[currentSlide]} />
           </div>
         </div>
