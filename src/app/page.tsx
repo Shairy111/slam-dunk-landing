@@ -124,14 +124,17 @@ export default function Home() {
         It needs bg-brand-dark to keep the hero section black, while the outer wrapper handles the colored border.
       */}
       <div 
+        id="inner-scroll-container"
         ref={containerRef}
         className="relative flex-1 w-full bg-[#0A0A0A] shadow-2xl rounded-3xl md:rounded-[2.5rem] overflow-hidden"
       >
         {/* Animated Background for Section 3 */}
         <div 
           ref={themeBgRef}
-          className="absolute inset-0 z-0 pointer-events-none transition-colors duration-1000 opacity-0"
-          style={{ backgroundColor: slides[currentSlide].themeColor }}
+          className="absolute inset-0 z-0 pointer-events-none transition-all duration-1000 opacity-0"
+          style={{ 
+            background: `radial-gradient(circle at center, ${slides[currentSlide].themeColor}33 0%, transparent 60%)` 
+          }}
         />
 
         {/* Fixed Header */}

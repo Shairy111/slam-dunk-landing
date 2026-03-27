@@ -306,9 +306,9 @@ export const Basketball = ({ slide }: BasketballProps) => {
       // to end after 2 full viewport scrolls (200vh of actual scrolling distance)
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: document.body, 
+          trigger: "#inner-scroll-container", 
           start: "top top", 
-          end: "+=200%", // EXACTLY 2 viewport heights of scroll distance
+          end: "bottom bottom", 
           scrub: 1, // Smooth scrubbing
           invalidateOnRefresh: true,
           snap: {

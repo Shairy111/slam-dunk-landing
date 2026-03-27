@@ -7,7 +7,7 @@ type SpecsSectionProps = {
 
 export const SpecsSection = ({ slide }: SpecsSectionProps) => {
   return (
-    <div className="relative w-full h-full flex items-center justify-center pointer-events-none -mt-[1vw] md:-mt-[2vw]">
+    <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
       
       {/* Animated Background HUD Rings (SVG) */}
       <div className="absolute inset-0 flex items-center justify-center opacity-80 z-0">
