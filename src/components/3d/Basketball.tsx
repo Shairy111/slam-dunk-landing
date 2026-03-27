@@ -286,32 +286,44 @@ export const Basketball = ({ slide }: BasketballProps) => {
     }
   }, [slide, uniforms]);
 
+  // Handle continuous rotation in the third section
+  const scrollProgress = useRef(0);
+  
+  useFrame((state, delta) => {
+    // If we are at the bottom of the scroll (in the Specs section), 
+    // smoothly rotate the ball on its Y axis continuously
+    if (groupRef.current && scrollProgress.current > 0.9) {
+      groupRef.current.rotation.y += delta * 0.5; // Smooth slow rotation
+    }
+  });
+
   // ScrollTrigger Animation
   useEffect(() => {
     if (!groupRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Create a timeline bound strictly to the window scroll
+      // Because we now have 3 full sections (300vh total), we need the scroll trigger 
+      // to end after 2 full viewport scrolls (200vh of actual scrolling distance)
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: document.body, 
           start: "top top", 
-          end: "100%", // End after exactly 1 viewport height of scrolling
+          end: "+=200%", // EXACTLY 2 viewport heights of scroll distance
           scrub: 1, // Smooth scrubbing
           invalidateOnRefresh: true,
-          // Play swoosh sound when scrolling down into the performance section, 
-          // and when scrolling back up into the hero section
-          onToggle: (self) => {
-            // self.isActive is true when entering the trigger area (scrolling down past top)
-            // or entering backwards (scrolling up past bottom)
-            if (self.isActive || (!self.isActive && self.progress === 0)) {
-               playTransitionSound();
-            }
+          onUpdate: (self) => {
+            scrollProgress.current = self.progress;
           }
         }
       });
 
-      // We animate from the base state (0,0,0 and scale 0.85) to the target state
+      // Set explicit starting values to prevent the ball from "missing" on initial load
+      gsap.set(groupRef.current!.position, { x: 0, y: 0, z: 0 });
+      gsap.set(groupRef.current!.scale, { x: 0.85, y: 0.85, z: 0.85 });
+      gsap.set(groupRef.current!.rotation, { x: 0, y: 0, z: 0 });
+
+      // PHASE 1: Hero -> Performance Metrics (0% to 50% of the timeline)
+      // When scroll is halfway down (end of first section)
       tl.to(groupRef.current!.position, {
         x: 4.5,
         y: -0.5,
@@ -328,7 +340,27 @@ export const Basketball = ({ slide }: BasketballProps) => {
         y: Math.PI * 2.5, 
         z: -Math.PI * 0.2,
         ease: "power1.inOut",
-      }, 0);
+      }, 0)
+      
+      // PHASE 2: Performance Metrics -> Technical Specs (50% to 100% of the timeline)
+      // When scroll reaches the absolute bottom
+      .to(groupRef.current!.position, {
+        x: 0,
+        y: 0,
+        z: 0,
+        ease: "power2.inOut",
+      }, 0.5) // Starts at exactly the halfway point of the scroll
+      .to(groupRef.current!.scale, {
+        x: 0.7, // Scale down to fit the HUD
+        y: 0.7,
+        z: 0.7,
+        ease: "power2.inOut",
+      }, 0.5)
+      .to(groupRef.current!.rotation, {
+        y: Math.PI * 4.5, // Continue spinning another full rotation
+        z: 0, // Level out the tilt
+        ease: "power2.inOut",
+      }, 0.5);
     });
 
     return () => ctx.revert();

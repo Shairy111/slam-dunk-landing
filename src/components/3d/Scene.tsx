@@ -45,7 +45,7 @@ export const Scene = ({ slide }: SceneProps) => {
         <pointLight position={[3, -3, 2]} intensity={1.5} color={slide.buttonColor} distance={10} />
 
         <Suspense fallback={null}>
-          <group pointerEventsType={{ deny: ['pointermove'] }}>
+          <group>
             <Basketball slide={slide} />
           </group>
           

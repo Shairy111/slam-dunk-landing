@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Header } from "@/components/ui/Header";
 import { HeroOverlay } from "@/components/ui/HeroOverlay";
 import { PerformanceSection } from "@/components/ui/PerformanceSection";
+import { SpecsSection } from "@/components/ui/SpecsSection";
 import { Scene } from "@/components/3d/Scene";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -97,12 +98,16 @@ export default function Home() {
     <div 
       ref={mainWrapperRef}
       id="main-scroll-container"
-      className="w-full min-h-[200vh] transition-colors duration-1000"
+      className="flex flex-col w-full min-h-[300vh] transition-colors duration-1000 p-[1vw] md:p-[2vw]"
       style={{ backgroundColor: slides[0].themeColor }}
     >
+      {/* 
+        This is the inner black container that holds everything. 
+        It needs bg-brand-dark to keep the hero section black, while the outer wrapper handles the colored border.
+      */}
       <div 
         ref={containerRef}
-        className="relative w-full h-[200vh] bg-brand-dark shadow-2xl"
+        className="relative flex-1 w-full bg-[#0A0A0A] shadow-2xl rounded-3xl md:rounded-[2.5rem] overflow-hidden"
       >
         {/* Fixed Header */}
         <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none px-8 py-6 md:px-12 md:py-8">
@@ -110,12 +115,14 @@ export default function Home() {
         </div>
 
         {/* Global Fixed 3D Canvas Background - Must be absolutely fixed to viewport so it never scrolls out of view */}
-        <div className="sticky top-0 w-full h-screen overflow-hidden">
-          <Scene slide={slides[currentSlide]} />
+        <div className="fixed top-0 left-0 w-full h-screen overflow-hidden pointer-events-none z-0">
+          <div className="absolute inset-0 pointer-events-auto">
+            <Scene slide={slides[currentSlide]} />
+          </div>
         </div>
 
-        {/* Scrollable Content Layers - Absolute positioned over the sticky canvas to allow native body scroll */}
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none z-10 flex flex-col">
+        {/* Scrollable Content Layers - Native vertical scrolling block */}
+        <div className="relative w-full z-10 pointer-events-none flex flex-col">
           {/* Section 1: Hero Carousel (100vh) */}
           <div className="w-full h-screen relative shrink-0">
             <HeroOverlay 
@@ -130,6 +137,11 @@ export default function Home() {
           {/* Section 2: Performance Metrics (100vh) */}
           <div className="w-full h-screen relative shrink-0">
             <PerformanceSection slide={slides[currentSlide]} />
+          </div>
+
+          {/* Section 3: Technical Specs (100vh) */}
+          <div className="w-full h-screen relative shrink-0">
+            <SpecsSection slide={slides[currentSlide]} />
           </div>
         </div>
 
