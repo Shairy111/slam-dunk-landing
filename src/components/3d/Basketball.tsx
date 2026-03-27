@@ -696,25 +696,27 @@ export const Basketball = ({ slide }: BasketballProps) => {
                 `
               );
 
-              // Override Roughness (Make the lines matte)
-              shader.fragmentShader = shader.fragmentShader.replace(
-                `#include <roughnessmap_fragment>`,
-                `
-                #include <roughnessmap_fragment>
-                // Leather roughness is from the map, but lines get a fixed high roughness (matte)
-                roughnessFactor = mix(roughnessFactor, 0.9, maskVal);
-                `
-              );
-              
-               // Override Metalness (Make the lines non-metallic)
-               shader.fragmentShader = shader.fragmentShader.replace(
-                `#include <metalnessmap_fragment>`,
-                `
-                #include <metalnessmap_fragment>
-                // Lines get 0 metalness
-                metalnessFactor = mix(metalnessFactor, 0.0, maskVal);
-                `
-              );
+              // Override Roughness (Make the lines have a matte shine)
+            shader.fragmentShader = shader.fragmentShader.replace(
+              `#include <roughnessmap_fragment>`,
+              `
+              #include <roughnessmap_fragment>
+              // Leather roughness is from the map, but lines get a specific roughness
+              // A value around 0.4 - 0.5 gives a nice "matte shine" (not perfectly glossy, but reflective enough)
+              roughnessFactor = mix(roughnessFactor, 0.45, maskVal);
+              `
+            );
+            
+             // Override Metalness (Give the lines a slight metallic property to catch light)
+             shader.fragmentShader = shader.fragmentShader.replace(
+              `#include <metalnessmap_fragment>`,
+              `
+              #include <metalnessmap_fragment>
+              // Adding a tiny bit of metalness (0.2) helps the lines reflect the environment map
+              // and the point lights better, giving them that premium "painted on" look.
+              metalnessFactor = mix(metalnessFactor, 0.25, maskVal);
+              `
+            );
             }}
           />
         </mesh>
