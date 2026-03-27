@@ -573,6 +573,35 @@ export const Basketball = ({ slide }: BasketballProps) => {
         ctx.lineTo(x, 1024);
         ctx.stroke();
       }
+    } else if (slide.patternType === "geo") {
+      // Fourth slide: Geometric/Tribal pattern
+      ctx.lineWidth = 12;
+      
+      // Diagonal slashes
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(2048, 1024);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(2048, 0);
+      ctx.lineTo(0, 1024);
+      ctx.stroke();
+
+      // Diamond center
+      ctx.beginPath();
+      ctx.moveTo(1024, 128);
+      ctx.lineTo(1792, 512);
+      ctx.lineTo(1024, 896);
+      ctx.lineTo(256, 512);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Equator
+      ctx.beginPath();
+      ctx.moveTo(0, 512);
+      ctx.lineTo(2048, 512);
+      ctx.stroke();
     } else {
       // Classic Basketball Pattern
       ctx.lineWidth = 16;

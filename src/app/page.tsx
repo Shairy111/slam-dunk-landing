@@ -75,7 +75,7 @@ const slides: SlideData[] = [
     buttonColor: "#CC0000", // Bright red button from screenshot
     ballBaseColor: "#0A0A0A", // Very dark grey/black ball
     ballLineColor: "#FF0000", // Bright red lines
-    patternType: "classic", // Uses the classic basketball lines
+    patternType: "geo", // New unique geometric pattern
   }
 ];
 
