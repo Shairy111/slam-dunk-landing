@@ -19,6 +19,7 @@ type BasketballProps = {
 export const Basketball = ({ slide }: BasketballProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const dunkGroupRef = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const playBounceSound = useBounceSound();
   const playTransitionSound = useTransitionSound();
@@ -321,92 +322,81 @@ export const Basketball = ({ slide }: BasketballProps) => {
       const targetTopY = 3.8; 
 
       // 1. Roll to the bottom-left windup position
+      // Using a single bezier path or extremely tight eases for a fluid motion
       tl.to(dunkGroupRef.current.position, {
         x: targetLeftX,
         y: targetBottomY,
         z: 0,
         duration: 0.6,
-        ease: "power2.inOut"
+        ease: "power2.in" // Accelerate into the corner
       }, 0)
       .to(dunkGroupRef.current.scale, {
-        x: 0.8, y: 0.8, z: 0.8, // Don't shrink much during windup
+        x: 0.8, y: 0.8, z: 0.8,
         duration: 0.6,
-        ease: "power2.inOut"
+        ease: "power2.in"
       }, 0)
-      // Roll rotation
-      // FIX: Calculate absolute target Z rotation
-      const currentRotZ = dunkGroupRef.current.rotation.z;
-      const targetRotZ = currentRotZ + Math.PI * 1.5;
-
-      tl.to(dunkGroupRef.current.rotation, {
-        z: targetRotZ,
-        duration: 0.6,
-        ease: "power2.inOut"
-      }, 0)
-
-      // Play swish/launch sound
+      
+      // Play swish/launch sound exactly at the bounce point
       .call(() => playTransitionSound(), [], 0.6)
 
-      // 2. The Launch & Arc (Extremely straight, tight trajectory)
-      // We combine X, Y, Z, and Scale into ONE continuous motion for absolute smoothness
+      // 2. The Launch & Arc (Single fluid motion)
+      // X & Z move linearly to maintain a perfect diagonal line in 3D space
       .to(dunkGroupRef.current.position, {
         x: targetRightX,
-        z: -1.5, // Keep it very close to camera so it doesn't vanish
-        duration: 0.8,
-        ease: "power1.inOut" // Smooth linear-ish flight
+        z: -1.5, 
+        duration: 0.9,
+        ease: "none" // Linear horizontal movement is required for smooth parabolas
       }, 0.6)
       
-      // The Y Parabola - Flattened completely. It just goes up to the hoop.
+      // The Y Parabola - Single smooth tween using CustomEase or overlapping standard eases
       .to(dunkGroupRef.current.position, {
-        y: targetTopY + 1.0, // Very tiny peak, almost a straight line to the hoop
-        duration: 0.5,
-        ease: "power2.out"
+        y: targetTopY + 1.2, 
+        duration: 0.45,
+        ease: "sine.out" // Sine easing creates the smoothest, roundest peak
       }, 0.6)
       .to(dunkGroupRef.current.position, {
-        y: targetTopY, // Fall exactly to the hoop rim
-        duration: 0.3,
-        ease: "power2.in"
-      }, 1.1)
+        y: targetTopY, 
+        duration: 0.45,
+        ease: "sine.in" // Smoothly accelerate back down
+      }, 1.05)
       
-      // Scale down smoothly
+      // Scale down smoothly matching the flight duration
       .to(dunkGroupRef.current.scale, {
-        x: 0.25, y: 0.25, z: 0.25, // Keep it quite large so it's clearly visible in the corner
-        duration: 0.8,
-        ease: "power2.inOut"
-      }, 0.6)
-
-      // Heavy backspin during flight
-      // FIX: Calculate absolute target rotation so it doesn't drift infinitely on multiple clicks
-      const currentRotX = dunkGroupRef.current.rotation.x;
-      const targetRotX = currentRotX - Math.PI * 4;
-      
-      tl.to(dunkGroupRef.current.rotation, {
-        x: targetRotX,
-        duration: 0.8,
-        ease: "none"
+        x: 0.25, y: 0.25, z: 0.25, 
+        duration: 0.9,
+        ease: "power1.inOut"
       }, 0.6)
 
       // 3. The Dunk (Clean, single fluid motion into the cart)
       .to(dunkGroupRef.current.position, {
-        y: targetTopY - 1.5, // Drop straight down through the net
-        duration: 0.25,
+        y: targetTopY - 2.0, // Drop straight down through the net
+        duration: 0.3,
         ease: "power2.in"
-      }, 1.4)
+      }, 1.5)
       .to(dunkGroupRef.current.scale, {
-        x: 0, y: 0, z: 0, // Shrink to 0 as it goes through
+        x: 0, y: 0, z: 0, 
         duration: 0.2,
         ease: "power2.in"
-      }, 1.45) // Delay slightly so it enters the hoop first
+      }, 1.6) 
 
       // 4. The Reset (Pop back to center with a bouncy feel)
-      // FIX: Ensure absolute rotation resets to 0 so the next dunk starts from the exact same state
       .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
-      .set(dunkGroupRef.current.rotation, { x: 0, y: 0, z: 0 })
       .to(dunkGroupRef.current.scale, {
         x: 1, y: 1, z: 1,
         duration: 0.8,
         ease: "elastic.out(1.2, 0.4)"
       }, "+=0.1");
+
+      // Handle Rotation Separately on the INNER mesh to prevent group drift
+      if (meshRef.current) {
+        gsap.to(meshRef.current.rotation, {
+          x: meshRef.current.rotation.x - Math.PI * 6,
+          y: meshRef.current.rotation.y + Math.PI * 2,
+          z: meshRef.current.rotation.z + Math.PI,
+          duration: 1.8,
+          ease: "power1.inOut"
+        });
+      }
     };
 
     window.addEventListener("dunk-ball", handleDunk);
@@ -613,7 +603,7 @@ export const Basketball = ({ slide }: BasketballProps) => {
   return (
     <group ref={groupRef} onDoubleClick={handleDoubleClick}>
       <group ref={dunkGroupRef}>
-        <mesh castShadow receiveShadow>
+        <mesh ref={meshRef} castShadow receiveShadow>
           <sphereGeometry args={[2.5, 128, 128]} />
 
           <meshStandardMaterial
