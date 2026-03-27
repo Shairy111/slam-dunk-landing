@@ -310,92 +310,93 @@ export const Basketball = ({ slide }: BasketballProps) => {
       // 3. Dunk into hoop
       // 4. Reset
 
-      // Calculate approximate screen boundaries for 3D space
-      // Keep it more visible on screen by not pushing it so far into the corners
-      const targetLeftX = -5.0; // Less far left
-      const targetBottomY = -2.5; // Less far down
+      // Calculate precise screen boundaries for 3D space to prevent clipping
+      // Keep it completely in view
+      const targetLeftX = -4.5;
+      const targetBottomY = -2.0;
       
-      const targetRightX = 6.0; // Less far right
-      const targetTopY = 3.5; // Less high up
+      // Calculate exact corner position based on standard screen sizes
+      // Pushing X right, keeping Z closer so it stays big, adjusting Y to hit the hoop exactly
+      const targetRightX = 7.5; 
+      const targetTopY = 3.8; 
 
       // 1. Roll to the bottom-left windup position
       tl.to(dunkGroupRef.current.position, {
         x: targetLeftX,
         y: targetBottomY,
         z: 0,
-        duration: 0.7,
+        duration: 0.6,
         ease: "power2.inOut"
       }, 0)
       .to(dunkGroupRef.current.scale, {
-        x: 0.7, y: 0.7, z: 0.7, // Keep it larger
-        duration: 0.7,
+        x: 0.8, y: 0.8, z: 0.8, // Don't shrink much during windup
+        duration: 0.6,
         ease: "power2.inOut"
       }, 0)
       // Roll rotation
       .to(dunkGroupRef.current.rotation, {
         z: Math.PI * 1.5,
-        duration: 0.7,
+        duration: 0.6,
         ease: "power2.inOut"
       }, 0)
 
       // Play swish/launch sound
-      .call(() => playTransitionSound(), [], 0.7)
+      .call(() => playTransitionSound(), [], 0.6)
 
-      // 2. The Launch & Arc (Straighter, tighter trajectory)
-      // X & Z move linearly
+      // 2. The Launch & Arc (Extremely straight, tight trajectory)
+      // We combine X, Y, Z, and Scale into ONE continuous motion for absolute smoothness
       .to(dunkGroupRef.current.position, {
         x: targetRightX,
-        z: -3, // Less deep into background so it stays highly visible
-        duration: 1.0, // Faster overall flight
-        ease: "none"
-      }, 0.7)
+        z: -1.5, // Keep it very close to camera so it doesn't vanish
+        duration: 0.8,
+        ease: "power1.inOut" // Smooth linear-ish flight
+      }, 0.6)
       
-      // The Y Parabola - Straighter, less dramatic peak
+      // The Y Parabola - Flattened completely. It just goes up to the hoop.
       .to(dunkGroupRef.current.position, {
-        y: targetTopY + 1.5, // Much lower peak for a straighter shot
+        y: targetTopY + 1.0, // Very tiny peak, almost a straight line to the hoop
         duration: 0.5,
         ease: "power2.out"
-      }, 0.7)
+      }, 0.6)
       .to(dunkGroupRef.current.position, {
-        y: targetTopY + 0.5, // Fall down exactly above the hoop
-        duration: 0.5,
+        y: targetTopY, // Fall exactly to the hoop rim
+        duration: 0.3,
         ease: "power2.in"
-      }, 1.2)
+      }, 1.1)
       
       // Scale down smoothly
       .to(dunkGroupRef.current.scale, {
-        x: 0.2, y: 0.2, z: 0.2, // Keep it slightly larger
-        duration: 1.0,
-        ease: "power1.inOut"
-      }, 0.7)
+        x: 0.25, y: 0.25, z: 0.25, // Keep it quite large so it's clearly visible in the corner
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, 0.6)
 
       // Heavy backspin during flight
       .to(dunkGroupRef.current.rotation, {
-        x: dunkGroupRef.current.rotation.x - Math.PI * 6,
-        duration: 1.0,
+        x: dunkGroupRef.current.rotation.x - Math.PI * 4,
+        duration: 0.8,
         ease: "none"
-      }, 0.7)
+      }, 0.6)
 
-      // 3. The Dunk (Smooth, clean drop through the net)
-      // We use a continuous ease from the fall to make it seamless
+      // 3. The Dunk (Clean, single fluid motion into the cart)
       .to(dunkGroupRef.current.position, {
-        y: targetTopY - 1.0, // Drop through
-        duration: 0.3,
-        ease: "power1.in" // Smoother, less jerky drop
-      }, 1.7)
+        y: targetTopY - 1.5, // Drop straight down through the net
+        duration: 0.25,
+        ease: "power2.in"
+      }, 1.4)
       .to(dunkGroupRef.current.scale, {
-        x: 0, y: 0, z: 0,
+        x: 0, y: 0, z: 0, // Shrink to 0 as it goes through
         duration: 0.2,
         ease: "power2.in"
-      }, 1.8) // Delay scale down slightly so it actually enters the hoop before vanishing
+      }, 1.45) // Delay slightly so it enters the hoop first
 
-      // 4. The Reset (Pop back to center)
+      // 4. The Reset (Pop back to center with a bouncy feel)
       .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
       .to(dunkGroupRef.current.scale, {
         x: 1, y: 1, z: 1,
         duration: 0.8,
         ease: "elastic.out(1.2, 0.4)"
-      }, "+=0.3");
+      }, "+=0.1");
     };
 
     window.addEventListener("dunk-ball", handleDunk);
