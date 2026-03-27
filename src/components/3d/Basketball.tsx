@@ -18,6 +18,7 @@ type BasketballProps = {
 
 export const Basketball = ({ slide }: BasketballProps) => {
   const groupRef = useRef<THREE.Group>(null);
+  const dunkGroupRef = useRef<THREE.Group>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const playBounceSound = useBounceSound();
   const playTransitionSound = useTransitionSound();
@@ -289,6 +290,87 @@ export const Basketball = ({ slide }: BasketballProps) => {
   // Handle continuous rotation in the third section
   const scrollProgress = useRef(0);
   
+  // Dunk Animation Event Listener
+  useEffect(() => {
+    const handleDunk = () => {
+      if (isBouncing.current || !dunkGroupRef.current) return;
+      isBouncing.current = true; // reuse bounce lock
+
+      const tl = gsap.timeline({
+        onComplete: () => {
+          isBouncing.current = false;
+          // Trigger the net swish animation in the Header
+          window.dispatchEvent(new CustomEvent("dunk-success"));
+        }
+      });
+
+      // Trajectory: 
+      // 1. Wind up (move left and down, scale down)
+      // 2. Shoot (move to top right)
+      // 3. Dunk (plunge down slightly, scale to 0)
+      // 4. Reset (pop back to original)
+
+      tl.to(dunkGroupRef.current.position, {
+        x: -4, 
+        y: -2, 
+        z: 1,
+        duration: 0.5, 
+        ease: "power2.out"
+      }, 0)
+      .to(dunkGroupRef.current.scale, {
+        x: 0.8, y: 0.8, z: 0.8,
+        duration: 0.5,
+        ease: "power2.out"
+      }, 0)
+      
+      // Shoot towards the hoop (top right)
+      .to(dunkGroupRef.current.position, {
+        x: 5, 
+        y: 4.5, 
+        z: -3,
+        duration: 0.7, 
+        ease: "power1.in"
+      }, 0.5)
+      .to(dunkGroupRef.current.scale, {
+        x: 0.25, y: 0.25, z: 0.25,
+        duration: 0.7, 
+        ease: "power1.in"
+      }, 0.5)
+      
+      // Plunge through the net
+      .to(dunkGroupRef.current.position, {
+        y: 3,
+        duration: 0.2,
+        ease: "power2.in"
+      }, 1.2)
+      .to(dunkGroupRef.current.scale, {
+        x: 0, y: 0, z: 0,
+        duration: 0.2,
+        ease: "power2.in"
+      }, 1.2)
+
+      // Reset invisibly and pop back
+      .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
+      .to(dunkGroupRef.current.scale, {
+        x: 1, y: 1, z: 1,
+        duration: 0.6,
+        ease: "elastic.out(1, 0.5)"
+      }, "+=0.3");
+
+      // Add a dramatic spin to the ball while it flies
+      tl.to(dunkGroupRef.current.rotation, {
+        x: Math.PI * 4,
+        y: Math.PI * 2,
+        z: -Math.PI * 2,
+        duration: 1.4,
+        ease: "power1.inOut"
+      }, 0);
+    };
+
+    window.addEventListener("dunk-ball", handleDunk);
+    return () => window.removeEventListener("dunk-ball", handleDunk);
+  }, []);
+
   useFrame((state, delta) => {
     // If we are at the bottom of the scroll (in the Specs section), 
     // smoothly rotate the ball on its Y axis continuously
@@ -488,94 +570,96 @@ export const Basketball = ({ slide }: BasketballProps) => {
 
   return (
     <group ref={groupRef} onDoubleClick={handleDoubleClick}>
-      <mesh castShadow receiveShadow>
-        <sphereGeometry args={[2.5, 128, 128]} />
+      <group ref={dunkGroupRef}>
+        <mesh castShadow receiveShadow>
+          <sphereGeometry args={[2.5, 128, 128]} />
 
-        <meshStandardMaterial
-          ref={materialRef}
-          normalMap={normalMap}
-          roughnessMap={roughnessMap}
-          normalScale={new THREE.Vector2(4.5, 4.5)} 
-          metalness={0.15} 
-          roughness={0.55}
-          envMapIntensity={2.0} 
-          // Inject custom shader code to override the material properties based on the mask
-          onBeforeCompile={(shader) => {
-            shader.uniforms.uLineMask = uniforms.uLineMask;
-            shader.uniforms.uBaseColor = uniforms.uBaseColor;
-            shader.uniforms.uLineColor = uniforms.uLineColor;
+          <meshStandardMaterial
+            ref={materialRef}
+            normalMap={normalMap}
+            roughnessMap={roughnessMap}
+            normalScale={new THREE.Vector2(4.5, 4.5)} 
+            metalness={0.15} 
+            roughness={0.55}
+            envMapIntensity={2.0} 
+            // Inject custom shader code to override the material properties based on the mask
+            onBeforeCompile={(shader) => {
+              shader.uniforms.uLineMask = uniforms.uLineMask;
+              shader.uniforms.uBaseColor = uniforms.uBaseColor;
+              shader.uniforms.uLineColor = uniforms.uLineColor;
 
-            // Ensure vUv is passed from vertex to fragment shader
-            shader.vertexShader = shader.vertexShader.replace(
-              `#include <common>`,
-              `
-              #include <common>
-              varying vec2 vCustomUv;
-              `
-            );
-            shader.vertexShader = shader.vertexShader.replace(
-              `#include <uv_vertex>`,
-              `
-              #include <uv_vertex>
-              vCustomUv = uv;
-              `
-            );
+              // Ensure vUv is passed from vertex to fragment shader
+              shader.vertexShader = shader.vertexShader.replace(
+                `#include <common>`,
+                `
+                #include <common>
+                varying vec2 vCustomUv;
+                `
+              );
+              shader.vertexShader = shader.vertexShader.replace(
+                `#include <uv_vertex>`,
+                `
+                #include <uv_vertex>
+                vCustomUv = uv;
+                `
+              );
 
-            // Inject uniforms and varying into fragment shader
-            shader.fragmentShader = shader.fragmentShader.replace(
-              `#include <common>`,
-              `
-              #include <common>
-              varying vec2 vCustomUv;
-              uniform sampler2D uLineMask;
-              uniform vec3 uBaseColor;
-              uniform vec3 uLineColor;
-              `
-            );
+              // Inject uniforms and varying into fragment shader
+              shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <common>`,
+                `
+                #include <common>
+                varying vec2 vCustomUv;
+                uniform sampler2D uLineMask;
+                uniform vec3 uBaseColor;
+                uniform vec3 uLineColor;
+                `
+              );
 
-            // Override Color (Map)
-            shader.fragmentShader = shader.fragmentShader.replace(
-              `#include <color_fragment>`,
-              `
-              #include <color_fragment>
-              float maskVal = texture2D(uLineMask, vCustomUv).r;
-              diffuseColor.rgb = mix(uBaseColor, uLineColor, maskVal);
-              `
-            );
+              // Override Color (Map)
+              shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <color_fragment>`,
+                `
+                #include <color_fragment>
+                float maskVal = texture2D(uLineMask, vCustomUv).r;
+                diffuseColor.rgb = mix(uBaseColor, uLineColor, maskVal);
+                `
+              );
 
-            // Override Normal (Flatten the bumps on the lines). Use non-perturbed geometry normal (vNormal) as base.
-            shader.fragmentShader = shader.fragmentShader.replace(
-              `#include <normal_fragment_maps>`,
-              `
-              #include <normal_fragment_maps>
-              // If we are on a line (maskVal > 0.5), flatten the normal back to the original geometry normal
-              vec3 geomNormal = normalize(vNormal);
-              normal = normalize(mix(normal, geomNormal, maskVal));
-              `
-            );
+              // Override Normal (Flatten the bumps on the lines). Use non-perturbed geometry normal (vNormal) as base.
+              shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <normal_fragment_maps>`,
+                `
+                #include <normal_fragment_maps>
+                // If we are on a line (maskVal > 0.5), flatten the normal back to the original geometry normal
+                vec3 geomNormal = normalize(vNormal);
+                normal = normalize(mix(normal, geomNormal, maskVal));
+                `
+              );
 
-            // Override Roughness (Make the lines matte)
-            shader.fragmentShader = shader.fragmentShader.replace(
-              `#include <roughnessmap_fragment>`,
-              `
-              #include <roughnessmap_fragment>
-              // Leather roughness is from the map, but lines get a fixed high roughness (matte)
-              roughnessFactor = mix(roughnessFactor, 0.9, maskVal);
-              `
-            );
-            
-             // Override Metalness (Make the lines non-metallic)
-             shader.fragmentShader = shader.fragmentShader.replace(
-              `#include <metalnessmap_fragment>`,
-              `
-              #include <metalnessmap_fragment>
-              // Lines get 0 metalness
-              metalnessFactor = mix(metalnessFactor, 0.0, maskVal);
-              `
-            );
-          }}
-        />
-      </mesh>
+              // Override Roughness (Make the lines matte)
+              shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <roughnessmap_fragment>`,
+                `
+                #include <roughnessmap_fragment>
+                // Leather roughness is from the map, but lines get a fixed high roughness (matte)
+                roughnessFactor = mix(roughnessFactor, 0.9, maskVal);
+                `
+              );
+              
+               // Override Metalness (Make the lines non-metallic)
+               shader.fragmentShader = shader.fragmentShader.replace(
+                `#include <metalnessmap_fragment>`,
+                `
+                #include <metalnessmap_fragment>
+                // Lines get 0 metalness
+                metalnessFactor = mix(metalnessFactor, 0.0, maskVal);
+                `
+              );
+            }}
+          />
+        </mesh>
+      </group>
     </group>
   );
 };

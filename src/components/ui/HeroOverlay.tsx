@@ -159,6 +159,7 @@ export const HeroOverlay = ({ slide, totalSlides, currentIndex, onNext, onPrev }
         >
           <button 
             ref={buttonRef}
+            onClick={() => window.dispatchEvent(new CustomEvent("dunk-ball"))}
             className="text-[#0A0A0A] px-10 py-4 md:px-14 md:py-5 text-sm md:text-base font-bold tracking-[0.2em] uppercase transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: slide.buttonColor }}
           >
