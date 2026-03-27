@@ -352,13 +352,13 @@ export const Basketball = ({ slide }: BasketballProps) => {
       .to(groupRef.current!.position, {
         x: 0,
         y: 0,
-        z: 0,
+        z: 0.5, // Move it closer to camera to fit the rings exactly
         ease: "power2.inOut",
       }, 0.5) // Starts at exactly the halfway point of the scroll
       .to(groupRef.current!.scale, {
-        x: 0.7, // Scale down to fit the HUD
-        y: 0.7,
-        z: 0.7,
+        x: 1.15, // Scale up to perfectly match the inner SVG ring
+        y: 1.15,
+        z: 1.15,
         ease: "power2.inOut",
       }, 0.5)
       .to(groupRef.current!.rotation, {

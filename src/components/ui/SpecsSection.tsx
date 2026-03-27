@@ -7,51 +7,60 @@ type SpecsSectionProps = {
 
 export const SpecsSection = ({ slide }: SpecsSectionProps) => {
   return (
-    <div className="relative w-full h-full flex items-center justify-center pointer-events-none">
+    <div className="relative w-full h-full flex items-center justify-center pointer-events-none -mt-[1vw] md:-mt-[2vw]">
       
       {/* Animated Background HUD Rings (SVG) */}
-      <div className="absolute inset-0 flex items-center justify-center opacity-60 z-0">
+      <div className="absolute inset-0 flex items-center justify-center opacity-80 z-0">
         {/* Static Crosshairs */}
-        <div className="w-full h-[1px] bg-[#333333]/50 absolute" />
-        <div className="w-[1px] h-full bg-[#333333]/50 absolute" />
+        <div className="w-full h-[1px] bg-[#333333]/40 absolute" />
+        <div className="w-[1px] h-full bg-[#333333]/40 absolute" />
 
-        <svg className="absolute w-[150vmin] h-[150vmin] max-w-[1000px] max-h-[1000px]" viewBox="0 0 1000 1000">
-          {/* Inner Ring Group - Clockwise */}
-          <g style={{ transformOrigin: 'center', animation: 'spin 20s linear infinite' }}>
-            <circle cx="500" cy="500" r="220" fill="none" stroke="#444444" strokeWidth="1" />
-            {/* Ticks */}
-            <line x1="500" y1="270" x2="500" y2="290" stroke="#777777" strokeWidth="2" />
-            <line x1="500" y1="710" x2="500" y2="730" stroke="#777777" strokeWidth="2" />
-            <line x1="270" y1="500" x2="290" y2="500" stroke="#777777" strokeWidth="2" />
-            <line x1="710" y1="500" x2="730" y2="500" stroke="#777777" strokeWidth="2" />
+        <svg className="absolute w-[140vmin] h-[140vmin] max-w-[900px] max-h-[900px]" viewBox="0 0 1000 1000">
+          <style>
+            {`
+              @keyframes spin-cw { 100% { transform: rotate(360deg); } }
+              @keyframes spin-ccw { 100% { transform: rotate(-360deg); } }
+              @keyframes pulse-opacity { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+            `}
+          </style>
+
+          {/* Outer pulsing thin ring */}
+          <circle cx="500" cy="500" r="460" fill="none" stroke="#222" strokeWidth="1" />
+          <g style={{ transformOrigin: 'center', animation: 'spin-cw 40s linear infinite' }}>
+            <circle cx="500" cy="500" r="460" fill="none" stroke={slide.themeColor} strokeWidth="1.5" strokeDasharray="10 40 30 100" style={{ animation: 'pulse-opacity 4s ease-in-out infinite' }} />
           </g>
 
-          {/* Middle Ring Group - Counter-Clockwise */}
-          <g style={{ transformOrigin: 'center', animation: 'spin 30s linear infinite reverse' }}>
-            <circle cx="500" cy="500" r="320" fill="none" stroke="#333333" strokeWidth="1.5" strokeDasharray="4 12" />
-            {/* Theme colored sweeping arc 1 */}
-            <circle cx="500" cy="500" r="320" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeDasharray="100 2000" strokeLinecap="round" />
-            {/* Theme colored sweeping arc 2 */}
-            <circle cx="500" cy="500" r="320" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeDasharray="100 2000" strokeDashoffset="-1000" strokeLinecap="round" />
+          {/* Middle complex tracking ring */}
+          <circle cx="500" cy="500" r="380" fill="none" stroke="#1a1a1a" strokeWidth="8" />
+          <g style={{ transformOrigin: 'center', animation: 'spin-ccw 25s linear infinite' }}>
+            <circle cx="500" cy="500" r="380" fill="none" stroke="#333" strokeWidth="2" strokeDasharray="4 16" />
+            {/* Theme colored arcs */}
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="4" strokeDasharray="150 2000" strokeLinecap="round" />
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="4" strokeDasharray="80 2000" strokeDashoffset="-800" strokeLinecap="round" />
             
-            {/* Extra Accent Ticks */}
-            <line x1="500" y1="170" x2="500" y2="190" stroke="#ffffff" strokeWidth="1" transform="rotate(45 500 500)" />
-            <line x1="500" y1="170" x2="500" y2="190" stroke="#ffffff" strokeWidth="1" transform="rotate(225 500 500)" />
+            {/* Glow/Pulse effect on an arc */}
+            <circle cx="500" cy="500" r="380" fill="none" stroke={slide.themeColor} strokeWidth="8" strokeDasharray="20 2000" strokeDashoffset="-300" strokeLinecap="round" style={{ animation: 'pulse-opacity 2s infinite', filter: 'blur(4px)' }} />
           </g>
 
-          {/* Outer Ring Group - Clockwise Slow */}
-          <g style={{ transformOrigin: 'center', animation: 'spin 40s linear infinite' }}>
-            <circle cx="500" cy="500" r="420" fill="none" stroke="#222222" strokeWidth="1" />
-            {/* 8 Ticks around */}
-            {Array.from({ length: 8 }).map((_, i) => (
-              <line 
-                key={i} 
-                x1="500" y1="70" x2="500" y2="90" 
-                stroke={i % 2 === 0 ? slide.themeColor : "#555555"} 
-                strokeWidth={i % 2 === 0 ? 3 : 1} 
-                transform={`rotate(${i * 45} 500 500)`} 
-              />
-            ))}
+          {/* Inner tight framing ring */}
+          <g style={{ transformOrigin: 'center', animation: 'spin-cw 15s linear infinite' }}>
+            <circle cx="500" cy="500" r="300" fill="none" stroke="#444" strokeWidth="1" strokeDasharray="100 20" />
+            <circle cx="500" cy="500" r="300" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeDasharray="40 2000" strokeLinecap="round" />
+            <circle cx="500" cy="500" r="290" fill="none" stroke="#555" strokeWidth="1" strokeDasharray="2 8" />
+          </g>
+
+          {/* Animated Target brackets */}
+          <g style={{ animation: 'pulse-opacity 3s infinite' }}>
+            <path d="M 480 120 L 500 100 L 520 120" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 480 880 L 500 900 L 520 880" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 120 480 L 100 500 L 120 520" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M 880 480 L 900 500 L 880 520" fill="none" stroke={slide.themeColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+
+          {/* Top Center Grey Marker Dot (glued to the inner ring radius=300 -> y=200) */}
+          <g transform="translate(500, 200)">
+            <circle cx="0" cy="0" r="14" fill="#444" />
+            <circle cx="0" cy="0" r="4" fill="#111" />
           </g>
         </svg>
       </div>
@@ -59,7 +68,7 @@ export const SpecsSection = ({ slide }: SpecsSectionProps) => {
       {/* Top Left Spec */}
       <div className="absolute top-[20%] left-[10%] md:left-[20%] z-10 flex flex-col items-start">
         <div className="flex items-center gap-4">
-          <div className="w-[2px] h-12" style={{ backgroundColor: slide.themeColor }} />
+          <div className="w-[2px] h-12 transition-colors duration-500" style={{ backgroundColor: slide.themeColor }} />
           <div>
             <div className="text-white text-3xl md:text-5xl font-bold tracking-tight">1.2<span className="text-xl md:text-2xl text-brand-gray">mm</span></div>
             <div className="text-brand-gray text-[10px] md:text-xs tracking-[0.2em] uppercase mt-1">Pebble Height</div>
@@ -74,7 +83,7 @@ export const SpecsSection = ({ slide }: SpecsSectionProps) => {
       {/* Bottom Right Spec */}
       <div className="absolute bottom-[20%] right-[10%] md:right-[20%] z-10 flex flex-col items-end text-right">
         <div className="flex items-center gap-4 flex-row-reverse">
-          <div className="w-[2px] h-12" style={{ backgroundColor: slide.buttonColor }} />
+          <div className="w-[2px] h-12 transition-colors duration-500" style={{ backgroundColor: slide.buttonColor }} />
           <div>
             <div className="text-white text-3xl md:text-5xl font-bold tracking-tight">High-Tack</div>
             <div className="text-brand-gray text-[10px] md:text-xs tracking-[0.2em] uppercase mt-1">Coating Spec</div>
@@ -85,10 +94,6 @@ export const SpecsSection = ({ slide }: SpecsSectionProps) => {
           <div className="text-[#555555] text-[10px] tracking-widest">AZIMUTH: 45.2°</div>
         </div>
       </div>
-
-      {/* Top Center Grey Marker Dot (Mapping to the screenshot) */}
-      <div className="absolute top-[28%] md:top-[20%] lg:top-[15%] left-1/2 -translate-x-1/2 w-5 h-5 md:w-7 md:h-7 bg-[#666666] rounded-full shadow-lg z-10" />
-
     </div>
   );
 };
