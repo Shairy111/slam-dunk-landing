@@ -35,8 +35,8 @@ const slides: SlideData[] = [
     titleRight: "ING",
     price: "$34.99",
     size: "29.5\"",
-    themeColor: "#FF4400", // Brand Orange
-    buttonColor: "#FF4400",
+    themeColor: "#E63E00", // Richer, slightly darker brand orange
+    buttonColor: "#E63E00",
     ballBaseColor: "#CC1F00",
     ballLineColor: "#080808",
     patternType: "classic",
