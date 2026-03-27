@@ -334,8 +334,12 @@ export const Basketball = ({ slide }: BasketballProps) => {
         ease: "power2.inOut"
       }, 0)
       // Roll rotation
-      .to(dunkGroupRef.current.rotation, {
-        z: Math.PI * 1.5,
+      // FIX: Calculate absolute target Z rotation
+      const currentRotZ = dunkGroupRef.current.rotation.z;
+      const targetRotZ = currentRotZ + Math.PI * 1.5;
+
+      tl.to(dunkGroupRef.current.rotation, {
+        z: targetRotZ,
         duration: 0.6,
         ease: "power2.inOut"
       }, 0)
@@ -372,8 +376,12 @@ export const Basketball = ({ slide }: BasketballProps) => {
       }, 0.6)
 
       // Heavy backspin during flight
-      .to(dunkGroupRef.current.rotation, {
-        x: dunkGroupRef.current.rotation.x - Math.PI * 4,
+      // FIX: Calculate absolute target rotation so it doesn't drift infinitely on multiple clicks
+      const currentRotX = dunkGroupRef.current.rotation.x;
+      const targetRotX = currentRotX - Math.PI * 4;
+      
+      tl.to(dunkGroupRef.current.rotation, {
+        x: targetRotX,
         duration: 0.8,
         ease: "none"
       }, 0.6)
@@ -391,7 +399,9 @@ export const Basketball = ({ slide }: BasketballProps) => {
       }, 1.45) // Delay slightly so it enters the hoop first
 
       // 4. The Reset (Pop back to center with a bouncy feel)
+      // FIX: Ensure absolute rotation resets to 0 so the next dunk starts from the exact same state
       .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
+      .set(dunkGroupRef.current.rotation, { x: 0, y: 0, z: 0 })
       .to(dunkGroupRef.current.scale, {
         x: 1, y: 1, z: 1,
         duration: 0.8,
