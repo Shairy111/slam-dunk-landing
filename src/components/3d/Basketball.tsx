@@ -305,77 +305,96 @@ export const Basketball = ({ slide }: BasketballProps) => {
       });
 
       // Trajectory: 
-      // 1. Wind up (pull back slightly to the left, stay centered)
-      // 2. Shoot (arc up towards the top right corner)
-      // 3. Dunk (drop straight down through the net)
+      // 1. Roll to bottom-left corner
+      // 2. Launch (parabolic arc) to top-right
+      // 3. Dunk into hoop
       // 4. Reset
 
-      // 1. The Windup (Pull back)
+      // Calculate approximate screen boundaries for 3D space
+      // These values assume standard 16:9 desktop aspect ratio at camera z=8
+      const targetLeftX = -7.5;
+      const targetBottomY = -3.5;
+      
+      const targetRightX = 8.0;
+      const targetTopY = 4.2;
+
+      // 1. Roll diagonally to the bottom-left corner
       tl.to(dunkGroupRef.current.position, {
-        x: -2, 
-        y: -1, 
-        z: 2, // Move closer to camera
-        duration: 0.6, 
-        ease: "back.out(1.2)"
+        x: targetLeftX,
+        y: targetBottomY,
+        z: 0,
+        duration: 0.8,
+        ease: "power2.inOut" // Smooth roll
       }, 0)
       .to(dunkGroupRef.current.scale, {
-        x: 1.1, y: 1.1, z: 1.1, // Swell slightly
+        x: 0.6, y: 0.6, z: 0.6, // Scale down slightly as it moves away
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, 0)
+      // Roll rotation
+      .to(dunkGroupRef.current.rotation, {
+        z: Math.PI * 2, // Roll along the floor
+        duration: 0.8,
+        ease: "power2.inOut"
+      }, 0)
+
+      // Play swish/launch sound right as it takes off from the bottom left
+      .call(() => playTransitionSound(), [], 0.8)
+
+      // 2. The Launch & Arc (Projectile from ground)
+      // X & Z move linearly, Y uses an arc (up fast, slow at peak, down fast)
+      .to(dunkGroupRef.current.position, {
+        x: targetRightX,
+        z: -3, // Move slightly into the background to match UI depth
+        duration: 1.2,
+        ease: "none" // Constant horizontal velocity for realistic projectile
+      }, 0.8)
+      
+      // The Y Parabola
+      .to(dunkGroupRef.current.position, {
+        y: targetTopY + 3.0, // High peak
         duration: 0.6,
-        ease: "power2.out"
-      }, 0)
-      
-      // 2. The Arc Shot (Shoot towards the top right corner, perfectly hitting the cart icon)
-      // We use a custom ease or separate x/y eases to create a parabolic arc
+        ease: "power2.out" // Decelerate against gravity
+      }, 0.8)
       .to(dunkGroupRef.current.position, {
-        x: 8.5, // Push much further right to hit the corner perfectly on most screens
-        z: -5, // Push far into the background
-        duration: 0.8, 
-        ease: "power1.inOut" // Linear horizontal movement
-      }, 0.6)
-      .to(dunkGroupRef.current.position, {
-        y: 6.5, // Shoot very high up to create the arc peak
-        duration: 0.4, 
-        ease: "power2.out" // Decelerate on the way up to the peak
-      }, 0.6)
-      .to(dunkGroupRef.current.position, {
-        y: 4.8, // Fall down to the exact height of the hoop
-        duration: 0.4, 
-        ease: "power2.in" // Accelerate on the way down from the peak
-      }, 1.0)
-      
-      .to(dunkGroupRef.current.scale, {
-        x: 0.15, y: 0.15, z: 0.15, // Shrink drastically to simulate distance
-        duration: 0.8, 
-        ease: "power2.in"
-      }, 0.6)
-      
-      // 3. The Dunk (Plunge straight down through the net)
-      .to(dunkGroupRef.current.position, {
-        y: 3.5, // Plunge down
-        duration: 0.25,
-        ease: "power3.in"
+        y: targetTopY - 0.5, // Fall to exactly inside the hoop height
+        duration: 0.6,
+        ease: "power2.in" // Accelerate with gravity
       }, 1.4)
+      
+      // Scale down to fit in the hoop perfectly
       .to(dunkGroupRef.current.scale, {
-        x: 0, y: 0, z: 0, // Vanish into the cart
+        x: 0.25, y: 0.25, z: 0.25, // Slightly larger than before so it doesn't vanish too early
+        duration: 1.2,
+        ease: "power2.in"
+      }, 0.8)
+
+      // Heavy backspin during flight
+      .to(dunkGroupRef.current.rotation, {
+        x: dunkGroupRef.current.rotation.x - Math.PI * 8, // Spin backwards rapidly
+        duration: 1.2,
+        ease: "none" // Constant spin in the air
+      }, 0.8)
+
+      // 3. The Dunk (Plunge through the net)
+      .to(dunkGroupRef.current.position, {
+        y: targetTopY - 1.5, // Drop through
         duration: 0.2,
         ease: "power3.in"
-      }, 1.45)
+      }, 2.0)
+      .to(dunkGroupRef.current.scale, {
+        x: 0, y: 0, z: 0, // Disappear into cart
+        duration: 0.15,
+        ease: "power3.in"
+      }, 2.05)
 
       // 4. The Reset (Pop back to center)
       .set(dunkGroupRef.current.position, { x: 0, y: 0, z: 0 })
       .to(dunkGroupRef.current.scale, {
         x: 1, y: 1, z: 1,
         duration: 0.8,
-        ease: "elastic.out(1.2, 0.4)"
+        ease: "elastic.out(1.2, 0.4)" // Bouncy return
       }, "+=0.2");
-
-      // Add a rapid backspin during the shot to simulate a real jump shot
-      tl.to(dunkGroupRef.current.rotation, {
-        x: dunkGroupRef.current.rotation.x - Math.PI * 6, // Heavy backspin
-        y: dunkGroupRef.current.rotation.y + Math.PI * 2,
-        duration: 1.6,
-        ease: "power2.inOut"
-      }, 0);
     };
 
     window.addEventListener("dunk-ball", handleDunk);
