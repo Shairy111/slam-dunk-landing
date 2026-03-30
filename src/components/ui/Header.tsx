@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { User } from "lucide-react";
 import gsap from "gsap";
 import { useSwishSound } from "@/hooks/useSwishSound";
@@ -85,18 +86,18 @@ export const Header = () => {
 
       {/* Navigation */}
       <nav className="hidden md:flex items-center gap-10 text-sm font-medium">
-        <a
-          href="#products"
+        <Link
+          href="/"
           className="text-brand-orange transition-colors duration-300"
         >
           Products
-        </a>
-        <a
-          href="#customize"
+        </Link>
+        <Link
+          href="/customize"
           className="text-brand-gray hover:text-brand-light transition-colors duration-300"
         >
           Customize
-        </a>
+        </Link>
         <a
           href="#contacts"
           className="text-brand-gray hover:text-brand-light transition-colors duration-300"
