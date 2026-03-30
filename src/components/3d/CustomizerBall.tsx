@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import gsap from "gsap";
+import { useBounceSound } from "@/hooks/useBounceSound";
 
 type CustomizerBallProps = {
   baseColor: string;
@@ -13,6 +14,7 @@ type CustomizerBallProps = {
 export const CustomizerBall = ({ baseColor, lineColor, patternType }: CustomizerBallProps) => {
   const groupRef = useRef<THREE.Group>(null);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
+  const playBounceSound = useBounceSound();
   
   // Custom shader uniform references
   const uniforms = useMemo(
@@ -233,15 +235,193 @@ export const CustomizerBall = ({ baseColor, lineColor, patternType }: Customizer
     }
   }, [patternType, textureData]);
 
+  // Handle realistic bounce on double click
+  const isBouncing = useRef(false);
+  const handleDoubleClick = (e: any) => {
+    e.stopPropagation(); // Prevent bubbling to OrbitControls
+    if (isBouncing.current || !groupRef.current) return;
+    
+    isBouncing.current = true;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isBouncing.current = false;
+        // Ensure scale is fully reset in case of any floating point errors
+        gsap.to(groupRef.current!.scale, { x: 1, y: 1, z: 1, duration: 0.1 });
+      }
+    });
+
+    const startY = groupRef.current.position.y;
+    const peakY = startY + 5; // Jump height
+    const floorY = startY;
+    const baseScale = 1; // Customizer ball starts at scale 1
+
+    // Upward jump (starts fast, slows down at the top)
+    tl.to(groupRef.current.position, {
+      y: peakY,
+      duration: 0.5,
+      ease: "power2.out",
+    }, 0)
+    // Stretch while moving up
+    .to(groupRef.current.scale, {
+      y: baseScale * 1.05,
+      x: baseScale * 0.95,
+      z: baseScale * 0.95,
+      duration: 0.25,
+      ease: "power1.out",
+    }, 0)
+    // Return to normal shape at the peak
+    .to(groupRef.current.scale, {
+      y: baseScale,
+      x: baseScale,
+      z: baseScale,
+      duration: 0.25,
+      ease: "power1.in",
+    }, 0.25)
+    
+    // First fall (starts slow, accelerates downwards)
+    .to(groupRef.current.position, {
+      y: floorY,
+      duration: 0.4,
+      ease: "power2.in",
+    }, 0.5)
+    // Stretch while falling
+    .to(groupRef.current.scale, {
+      y: baseScale * 1.05,
+      x: baseScale * 0.95,
+      z: baseScale * 0.95,
+      duration: 0.3,
+      ease: "power1.in",
+    }, 0.6)
+    
+    // IMPACT 1 (Squash)
+    .to(groupRef.current.scale, {
+      y: baseScale * 0.7, // Heavy squash
+      x: baseScale * 1.15, // Bulge out
+      z: baseScale * 1.15,
+      duration: 0.05,
+      ease: "power2.out",
+      onStart: () => playBounceSound(1.0), // Loudest thud
+    }, 0.9)
+
+    // First bounce up (recover shape fast, shoot up)
+    .to(groupRef.current.scale, {
+      y: baseScale * 1.02,
+      x: baseScale * 0.98,
+      z: baseScale * 0.98,
+      duration: 0.1,
+      ease: "power2.out",
+    }, 0.95)
+    .to(groupRef.current.position, {
+      y: startY + 2.5,
+      duration: 0.35,
+      ease: "power2.out",
+    }, 0.95)
+    
+    // Second fall
+    .to(groupRef.current.position, {
+      y: floorY,
+      duration: 0.3,
+      ease: "power2.in",
+    }, 1.3)
+    .to(groupRef.current.scale, {
+      y: baseScale,
+      x: baseScale,
+      z: baseScale,
+      duration: 0.1, // normalize shape during the smaller fall
+    }, 1.3)
+
+    // IMPACT 2
+    .to(groupRef.current.scale, {
+      y: baseScale * 0.85,
+      x: baseScale * 1.05,
+      z: baseScale * 1.05,
+      duration: 0.05,
+      ease: "power2.out",
+      onStart: () => playBounceSound(0.6), // Medium thud
+    }, 1.6)
+
+    // Second bounce up
+    .to(groupRef.current.scale, {
+      y: baseScale,
+      x: baseScale,
+      z: baseScale,
+      duration: 0.1,
+    }, 1.65)
+    .to(groupRef.current.position, {
+      y: startY + 1.0,
+      duration: 0.25,
+      ease: "power2.out",
+    }, 1.65)
+
+    // Third fall
+    .to(groupRef.current.position, {
+      y: floorY,
+      duration: 0.2,
+      ease: "power2.in",
+    }, 1.9)
+
+    // IMPACT 3
+    .to(groupRef.current.scale, {
+      y: baseScale * 0.95,
+      x: baseScale * 1.02,
+      z: baseScale * 1.02,
+      duration: 0.05,
+      ease: "power2.out",
+      onStart: () => playBounceSound(0.3), // Quiet thud
+    }, 2.1)
+
+    // Final tiny bounce up
+    .to(groupRef.current.scale, {
+      y: baseScale,
+      x: baseScale,
+      z: baseScale,
+      duration: 0.05,
+    }, 2.15)
+    .to(groupRef.current.position, {
+      y: startY + 0.3,
+      duration: 0.15,
+      ease: "power2.out",
+    }, 2.15)
+
+    // Final settle
+    .to(groupRef.current.position, {
+      y: floorY,
+      duration: 0.1,
+      ease: "power2.in",
+    }, 2.3)
+    .to(groupRef.current.scale, {
+      y: baseScale * 0.98,
+      x: baseScale * 1.01,
+      z: baseScale * 1.01,
+      duration: 0.05,
+      ease: "power2.out",
+      onStart: () => playBounceSound(0.1), // Tiny tap
+    }, 2.4)
+    .to(groupRef.current.scale, {
+      y: baseScale,
+      x: baseScale,
+      z: baseScale,
+      duration: 0.1,
+    }, 2.45);
+
+    // Add a spin during the entire sequence
+    gsap.to(groupRef.current.rotation, {
+      x: groupRef.current.rotation.x + Math.PI * 1.5,
+      z: groupRef.current.rotation.z + Math.PI * 0.5,
+      duration: 2.5,
+      ease: "power1.out",
+    });
+  };
+
   // Subtle constant rotation
   useFrame((state, delta) => {
-    if (groupRef.current) {
+    if (groupRef.current && !isBouncing.current) {
       groupRef.current.rotation.y += delta * 0.15; // Slow idle spin
     }
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} onDoubleClick={handleDoubleClick}>
       <mesh castShadow receiveShadow>
         <sphereGeometry args={[3, 128, 128]} /> {/* Slightly larger sphere for customize page */}
 
