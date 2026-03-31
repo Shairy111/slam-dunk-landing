@@ -12,7 +12,7 @@ type SceneProps = {
 const FallbackSphere = () => (
   <mesh>
     <sphereGeometry args={[2.5, 32, 32]} />
-    <meshStandardMaterial color="orange" />
+    <meshStandardMaterial color="#CC1F00" roughness={0.8} />
   </mesh>
 );
 

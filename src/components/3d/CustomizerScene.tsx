@@ -13,7 +13,7 @@ type CustomizerSceneProps = {
 const FallbackSphere = () => (
   <mesh>
     <sphereGeometry args={[3, 32, 32]} />
-    <meshStandardMaterial color="gray" />
+    <meshStandardMaterial color="#330000" roughness={0.8} />
   </mesh>
 );
 
