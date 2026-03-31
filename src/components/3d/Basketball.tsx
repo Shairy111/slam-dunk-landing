@@ -294,7 +294,7 @@ export const Basketball = ({ slide }: BasketballProps) => {
   // Dunk Animation Event Listener
   useEffect(() => {
     const handleDunk = () => {
-      if (isBouncing.current || !dunkGroupRef.current) return;
+      if (isBouncing.current || !dunkGroupRef.current || !groupRef.current) return;
       isBouncing.current = true; // reuse bounce lock
 
       const tl = gsap.timeline({

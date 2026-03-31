@@ -25,7 +25,7 @@ export type SlideData = {
   buttonColor: string;
   ballBaseColor: string;
   ballLineColor: string;
-  patternType?: "classic" | "grid";
+  patternType?: "classic" | "grid" | "geo";
 };
 
 const slides: SlideData[] = [
