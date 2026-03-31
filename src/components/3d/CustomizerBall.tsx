@@ -77,6 +77,8 @@ export const CustomizerBall = ({ baseColor, lineColor, patternType }: Customizer
   const [textureData, setTextureData] = React.useState<{ canvas: HTMLCanvasElement; texture: THREE.CanvasTexture } | null>(null);
 
   useEffect(() => {
+    if (typeof document === "undefined") return; // Safety check for Next.js SSR
+
     // This runs strictly on the client after mount, bypassing SSR issues entirely
     const c = document.createElement("canvas");
     c.width = 2048; 

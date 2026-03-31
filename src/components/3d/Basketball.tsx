@@ -35,6 +35,7 @@ export const Basketball = ({ slide }: BasketballProps) => {
   );
 
   // Load the high-res leather normal and roughness maps
+  // Added error handling and base paths that are safe for production Vercel environments
   const [normalMap, roughnessMap] = useTexture([
     "/textures/leather-normal.png",
     "/textures/leather-roughness.png"
@@ -514,6 +515,8 @@ export const Basketball = ({ slide }: BasketballProps) => {
   const [textureData, setTextureData] = React.useState<{ canvas: HTMLCanvasElement; texture: THREE.CanvasTexture } | null>(null);
 
   useEffect(() => {
+    if (typeof document === "undefined") return; // Safety check for Next.js SSR
+
     // This runs strictly on the client after mount, bypassing SSR issues entirely
     const c = document.createElement("canvas");
     c.width = 2048; 

@@ -9,6 +9,14 @@ type CustomizerSceneProps = {
   patternType: string;
 };
 
+// Error boundary fallback to prevent whole canvas from crashing if a texture fails
+const FallbackSphere = () => (
+  <mesh>
+    <sphereGeometry args={[3, 32, 32]} />
+    <meshStandardMaterial color="gray" />
+  </mesh>
+);
+
 export const CustomizerScene = ({ baseColor, lineColor, patternType }: CustomizerSceneProps) => {
   return (
     <div className="w-full h-full relative">
@@ -27,7 +35,7 @@ export const CustomizerScene = ({ baseColor, lineColor, patternType }: Customize
         className="w-full h-full z-10"
         dpr={[1, 2]}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={<FallbackSphere />}>
           <Environment preset="studio" environmentIntensity={0.5} />
           
           <ambientLight intensity={0.2} />

@@ -8,6 +8,14 @@ type SceneProps = {
   slide: SlideData;
 };
 
+// Error boundary fallback to prevent whole canvas from crashing if a texture fails
+const FallbackSphere = () => (
+  <mesh>
+    <sphereGeometry args={[2.5, 32, 32]} />
+    <meshStandardMaterial color="orange" />
+  </mesh>
+);
+
 export const Scene = ({ slide }: SceneProps) => {
   return (
     <div className="absolute inset-0 z-10 pointer-events-none">
@@ -44,7 +52,7 @@ export const Scene = ({ slide }: SceneProps) => {
         <pointLight position={[-3, 3, 2]} intensity={2.5} color="#ffffff" distance={10} />
         <pointLight position={[3, -3, 2]} intensity={1.5} color={slide.buttonColor} distance={10} />
 
-        <Suspense fallback={null}>
+        <Suspense fallback={<FallbackSphere />}>
           <group>
             <Basketball slide={slide} />
           </group>
