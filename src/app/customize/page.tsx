@@ -54,7 +54,7 @@ export default function CustomizePage() {
         {/* Header */}
         <div className="px-6 md:px-8 pb-8">
           <h1 className="font-anton text-4xl md:text-5xl uppercase leading-[0.9] tracking-wider mb-3">
-            Design Your<br />Legacy
+            Aero<br />Lab
           </h1>
           <p className="text-[#888] text-sm font-medium">Create a ball that matches your game.</p>
         </div>

@@ -1,22 +1,17 @@
 import type { Metadata } from "next";
-import { Anton, Inter } from "next/font/google";
+import { Inter, Anton } from "next/font/google";
 import "./globals.css";
 
-const anton = Anton({
-  variable: "--font-anton",
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const anton = Anton({ 
+  weight: "400", 
   subsets: ["latin"],
-  weight: "400",
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-anton" 
 });
 
 export const metadata: Metadata = {
-  title: "Slam Dunk | High-End Basketball",
-  description: "Premium basketball product experience",
+  title: "Aero Dunk | Next-Gen Basketballs",
+  description: "Experience the future of basketball with Aero Dunk's micro-texture technology.",
 };
 
 export default function RootLayout({
@@ -26,9 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${anton.variable} ${inter.variable} antialiased`}
-      >
+      <body className={`${inter.variable} ${anton.variable} font-sans antialiased bg-black text-white`}>
         {children}
       </body>
     </html>

@@ -79,7 +79,7 @@ export const Header = () => {
           <div className="w-6 h-1 bg-brand-light"></div>
         </div>
         <div className="flex flex-col uppercase font-anton text-xl leading-none tracking-wider">
-          <span>Slam</span>
+          <span>Aero</span>
           <span>Dunk</span>
         </div>
       </div>
